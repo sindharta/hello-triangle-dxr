@@ -1,0 +1,8 @@
+# User files
+*.vcxproj.user
+
+* Build files
+.vs/*
+obj/*
+bin/*
+
