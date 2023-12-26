@@ -45,6 +45,7 @@ buffer needs to be kept until the command list execution is finished.
 
 */
 
+#include "stdafx.h"
 #include "TopLevelASGenerator.h"
 
 // Helper to compute aligned buffer sizes

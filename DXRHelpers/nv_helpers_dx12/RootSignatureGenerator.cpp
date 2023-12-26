@@ -35,6 +35,7 @@ pointers will be bound.
 
 */
 
+#include "stdafx.h"
 #include "RootSignatureGenerator.h"
 
 namespace nv_helpers_dx12

@@ -39,6 +39,7 @@ compiling in debug mode.
 
 */
 
+#include "stdafx.h"
 #include "RaytracingPipelineGenerator.h"
 
 #include "dxcapi.h"

@@ -29,6 +29,7 @@ Contacts for feedback:
 - mlefrancois@nvidia.com (Martin-Karl Lefrancois)
 */
 
+#include "stdafx.h"
 #include "BottomLevelASGenerator.h"
 
 // Helper to compute aligned buffer sizes
