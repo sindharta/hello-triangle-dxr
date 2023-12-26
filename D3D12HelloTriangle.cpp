@@ -574,10 +574,10 @@ void D3D12HelloTriangle::CreateRaytracingPipeline()
     m_hitLibrary = nv_helpers_dx12::CompileShaderLibrary(L"Shaders/Hit.hlsl");
 
     // In a way similar to DLLs, each library is associated with a number of
-      // exported symbols. This
-      // has to be done explicitly in the lines below. Note that a single library
-      // can contain an arbitrary number of symbols, whose semantic is given in HLSL
-      // using the [shader("xxx")] syntax
+    // exported symbols. This
+    // has to be done explicitly in the lines below. Note that a single library
+    // can contain an arbitrary number of symbols, whose semantic is given in HLSL
+    // using the [shader("xxx")] syntax
     pipeline.AddLibrary(m_rayGenLibrary.Get(), { L"RayGen" });
     pipeline.AddLibrary(m_missLibrary.Get(), { L"Miss" });
     pipeline.AddLibrary(m_hitLibrary.Get(), { L"ClosestHit" });
@@ -603,8 +603,7 @@ void D3D12HelloTriangle::CreateRaytracingPipeline()
     // exported symbols are defined above the shaders can be simply referred to by
     // name.
 
-    // Hit group for the triangles, with a shader simply interpolating vertex
-    // colors
+    // Hit group for the triangles, with a shader simply interpolating vertex colors
     pipeline.AddHitGroup(L"HitGroup", L"ClosestHit");
 
     // The following section associates the root signature to each shader. Note
@@ -614,7 +613,7 @@ void D3D12HelloTriangle::CreateRaytracingPipeline()
     // closest-hit shaders share the same root signature.
     pipeline.AddRootSignatureAssociation(m_rayGenSignature.Get(), { L"RayGen" });
     pipeline.AddRootSignatureAssociation(m_missSignature.Get(), { L"Miss" });
-    pipeline.AddRootSignatureAssociation(m_hitSignature.Get(), { L"HitGroup" });
+    pipeline.AddRootSignatureAssociation(m_hitSignature.Get(), { L"HitGroup" }); //"ClosestHit" is bound to "HitGroup"
 
     // The payload size defines the maximum size of the data carried by the rays,
     // ie. the the data
