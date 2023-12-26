@@ -569,9 +569,9 @@ void D3D12HelloTriangle::CreateRaytracingPipeline()
     // set of DXIL libraries. We chose to separate the code in several libraries
     // by semantic (ray generation, hit, miss) for clarity. Any code layout can be
     // used.
-    m_rayGenLibrary = nv_helpers_dx12::CompileShaderLibrary(L"RayGen.hlsl");
-    m_missLibrary = nv_helpers_dx12::CompileShaderLibrary(L"Miss.hlsl");
-    m_hitLibrary = nv_helpers_dx12::CompileShaderLibrary(L"Hit.hlsl");
+    m_rayGenLibrary = nv_helpers_dx12::CompileShaderLibrary(L"Shaders/RayGen.hlsl");
+    m_missLibrary = nv_helpers_dx12::CompileShaderLibrary(L"Shaders/Miss.hlsl");
+    m_hitLibrary = nv_helpers_dx12::CompileShaderLibrary(L"Shaders/Hit.hlsl");
 
     // In a way similar to DLLs, each library is associated with a number of
       // exported symbols. This
