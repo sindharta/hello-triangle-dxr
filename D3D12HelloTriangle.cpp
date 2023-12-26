@@ -629,6 +629,9 @@ ComPtr<ID3D12RootSignature> D3D12HelloTriangle::CreateRayGenSignature() {
 //
 ComPtr<ID3D12RootSignature> D3D12HelloTriangle::CreateHitSignature() {
     nv_helpers_dx12::RootSignatureGenerator rsc;
+
+    rsc.AddRootParameter(D3D12_ROOT_PARAMETER_TYPE_SRV);
+
     return rsc.Generate(m_device.Get(), true);
 }
 
