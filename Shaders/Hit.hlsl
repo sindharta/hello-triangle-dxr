@@ -1,7 +1,6 @@
 #include "Common.hlsl"
 
-struct STriVertex
-{
+struct STriVertex {
     float3 vertex;
     float4 color;
 };
