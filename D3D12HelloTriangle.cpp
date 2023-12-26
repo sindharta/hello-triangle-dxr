@@ -271,7 +271,7 @@ void D3D12HelloTriangle::OnRender()
 
 	WaitForPreviousFrame();
 }
-
+                                                                                                                                                               
 void D3D12HelloTriangle::OnDestroy()
 {
 	// Ensure that the GPU is no longer referencing resources that are about to be
@@ -280,6 +280,19 @@ void D3D12HelloTriangle::OnDestroy()
 
 	CloseHandle(m_fenceEvent);
 }
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void D3D12HelloTriangle::CheckRaytracingSupport() {
+	D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {};
+	ThrowIfFailed(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5,
+		&options5, sizeof(options5)));
+	if (options5.RaytracingTier < D3D12_RAYTRACING_TIER_1_0)
+		throw std::runtime_error("Raytracing not supported on device");
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 void D3D12HelloTriangle::PopulateCommandList()
 {

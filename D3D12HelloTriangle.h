@@ -31,6 +31,7 @@ public:
 	virtual void OnUpdate();
 	virtual void OnRender();
 	virtual void OnDestroy();
+	void CheckRaytracingSupport();
 
 private:
 	static const UINT FrameCount = 2;
