@@ -56,6 +56,10 @@ void D3D12HelloTriangle::OnInit()
     // UAV), and create the heap referencing the resources used by the raytracing,
     // such as the acceleration structure
     CreateShaderResourceHeap(); // #DXR
+
+    // Create the shader binding table and indicating which shaders
+    // are invoked for each instance in the  AS
+    CreateShaderBindingTable();
 }
 
 // Load the rendering pipeline dependencies.
@@ -365,6 +369,80 @@ void D3D12HelloTriangle::PopulateCommandList()
         //RTX
         const float clearColor[] = { 0.6f, 0.8f, 0.4f, 1.0f };
         m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+        // #DXR
+        // Bind the descriptor heap giving access to the top-level acceleration
+        // structure, as well as the raytracing output
+        std::vector<ID3D12DescriptorHeap*> heaps = { m_srvUavHeap.Get() };
+        m_commandList->SetDescriptorHeaps(static_cast<uint32_t>(heaps.size()), heaps.data());
+
+        // On the last frame, the raytracing output was used as a copy source, to
+        // copy its contents into the render target. Now we need to transition it to
+        // a UAV so that the shaders can write in it.
+        CD3DX12_RESOURCE_BARRIER transition = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_outputResource.Get(), D3D12_RESOURCE_STATE_COPY_SOURCE,
+            D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_commandList->ResourceBarrier(1, &transition);
+
+        // Setup the raytracing task
+        D3D12_DISPATCH_RAYS_DESC desc = {};
+        // The layout of the SBT is as follows: ray generation shader, miss
+        // shaders, hit groups. As described in the CreateShaderBindingTable method,
+        // all SBT entries of a given type have the same size to allow a fixed stride.
+
+        // The ray generation shaders are always at the beginning of the SBT. 
+        uint32_t rayGenerationSectionSizeInBytes = m_sbtHelper.GetRayGenSectionSize();
+        desc.RayGenerationShaderRecord.StartAddress = m_sbtStorage->GetGPUVirtualAddress();
+        desc.RayGenerationShaderRecord.SizeInBytes = rayGenerationSectionSizeInBytes;
+
+        // The miss shaders are in the second SBT section, right after the ray
+        // generation shader. We have one miss shader for the camera rays and one
+        // for the shadow rays, so this section has a size of 2*m_sbtEntrySize. We
+        // also indicate the stride between the two miss shaders, which is the size
+        // of a SBT entry
+        uint32_t missSectionSizeInBytes = m_sbtHelper.GetMissSectionSize();
+        desc.MissShaderTable.StartAddress = m_sbtStorage->GetGPUVirtualAddress() + rayGenerationSectionSizeInBytes;
+        desc.MissShaderTable.SizeInBytes = missSectionSizeInBytes;
+        desc.MissShaderTable.StrideInBytes = m_sbtHelper.GetMissEntrySize();
+
+        // The hit groups section start after the miss shaders. In this sample we
+        // have one 1 hit group for the triangle
+        uint32_t hitGroupsSectionSize = m_sbtHelper.GetHitGroupSectionSize();
+        desc.HitGroupTable.StartAddress = m_sbtStorage->GetGPUVirtualAddress() +
+            rayGenerationSectionSizeInBytes +
+            missSectionSizeInBytes;
+        desc.HitGroupTable.SizeInBytes = hitGroupsSectionSize;
+        desc.HitGroupTable.StrideInBytes = m_sbtHelper.GetHitGroupEntrySize();
+
+        // Dimensions of the image to render, identical to a kernel launch dimension
+        desc.Width = GetWidth();
+        desc.Height = GetHeight();
+        desc.Depth = 1;
+
+        // Bind the raytracing pipeline
+        m_commandList->SetPipelineState1(m_rtStateObject.Get());
+        // Dispatch the rays and write to the raytracing output
+        m_commandList->DispatchRays(&desc);
+
+        // The raytracing output needs to be copied to the actual render target used
+        // for display. For this, we need to transition the raytracing output from a
+        // UAV to a copy source, and the render target buffer to a copy destination.
+        // We can then do the actual copy, before transitioning the render target
+        // buffer into a render target, that will be then used to display the image
+        transition = CD3DX12_RESOURCE_BARRIER::Transition(m_outputResource.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_COPY_SOURCE);
+        m_commandList->ResourceBarrier(1, &transition);
+
+        transition = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET,
+            D3D12_RESOURCE_STATE_COPY_DEST);
+        m_commandList->ResourceBarrier(1, &transition);
+
+        m_commandList->CopyResource(m_renderTargets[m_frameIndex].Get(),m_outputResource.Get());
+
+        transition = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_COPY_DEST,
+            D3D12_RESOURCE_STATE_RENDER_TARGET);
+        m_commandList->ResourceBarrier(1, &transition);
     }
 
 
@@ -709,3 +787,54 @@ void D3D12HelloTriangle::CreateShaderResourceHeap() {
     m_device->CreateShaderResourceView(nullptr, &srvDesc, srvHandle);
 }
 
+
+//-----------------------------------------------------------------------------
+//
+// The Shader Binding Table (SBT) is the cornerstone of the raytracing setup:
+// this is where the shader resources are bound to the shaders, in a way that
+// can be interpreted by the raytracer on GPU. In terms of layout, the SBT
+// contains a series of shader IDs with their resource pointers. The SBT
+// contains the ray generation shader, the miss shaders, then the hit groups.
+// Using the helper class, those can be specified in arbitrary order.
+//
+void D3D12HelloTriangle::CreateShaderBindingTable() {
+    // The SBT helper class collects calls to Add*Program.  If called several
+    // times, the helper must be emptied before re-adding shaders.
+    m_sbtHelper.Reset();
+
+    // The pointer to the beginning of the heap is the only parameter required by
+    // shaders without root parameters
+    D3D12_GPU_DESCRIPTOR_HANDLE srvUavHeapHandle = m_srvUavHeap->GetGPUDescriptorHandleForHeapStart();
+
+    // The helper treats both root parameter pointers and heap pointers as void*,
+    // while DX12 uses the
+    // D3D12_GPU_DESCRIPTOR_HANDLE to define heap pointers. The pointer in this
+    // struct is a UINT64, which then has to be reinterpreted as a pointer.
+    uint64_t* heapPointer = reinterpret_cast<uint64_t*>(srvUavHeapHandle.ptr);
+
+    // The ray generation only uses heap data
+    m_sbtHelper.AddRayGenerationProgram(L"RayGen", { heapPointer });
+
+    // The miss and hit shaders do not access any external resources: instead they
+    // communicate their results through the ray payload
+    m_sbtHelper.AddMissProgram(L"Miss", {});
+
+    // Adding the triangle hit shader
+    m_sbtHelper.AddHitGroup(L"HitGroup", {});
+
+    // Compute the size of the SBT given the number of shaders and their
+    // parameters
+    uint32_t sbtSize = m_sbtHelper.ComputeSBTSize();
+
+    // Create the SBT on the upload heap. This is required as the helper will use
+    // mapping to write the SBT contents. After the SBT compilation it could be
+    // copied to the default heap for performance.
+    m_sbtStorage = nv_helpers_dx12::CreateBuffer( m_device.Get(), sbtSize, D3D12_RESOURCE_FLAG_NONE,
+        D3D12_RESOURCE_STATE_GENERIC_READ, nv_helpers_dx12::kUploadHeapProps);
+    if (!m_sbtStorage) {
+        throw std::logic_error("Could not allocate the shader binding table");
+    }
+
+    // Compile the SBT from the shader and parameters info
+    m_sbtHelper.Generate(m_sbtStorage.Get(), m_rtStateObjectProps.Get());
+}

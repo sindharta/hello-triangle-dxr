@@ -12,7 +12,9 @@
 #pragma once
 
 #include "DXSample.h"
+
 #include "nv_helpers_dx12/TopLevelASGenerator.h"
+#include "nv_helpers_dx12/ShaderBindingTableGenerator.h"
 
 using namespace DirectX;
 
@@ -76,6 +78,7 @@ private: //DXR
 
     void CreateRaytracingOutputBuffer();
     void CreateShaderResourceHeap();
+    void CreateShaderBindingTable();
 
 private:
     static const UINT FrameCount = 2;
@@ -110,6 +113,7 @@ private:
     ComPtr<ID3D12Fence> m_fence;
     UINT64 m_fenceValue;
 
+private: //DXR
     bool m_raster;
 
     ComPtr<ID3D12Resource> m_bottomLevelAS; // Storage for the bottom Level AS (only one for this tutorial)
@@ -133,6 +137,9 @@ private:
 
     ComPtr<ID3D12Resource> m_outputResource;
     ComPtr<ID3D12DescriptorHeap> m_srvUavHeap;
+
+    nv_helpers_dx12::ShaderBindingTableGenerator m_sbtHelper;
+    ComPtr<ID3D12Resource> m_sbtStorage;
 
 };
 
