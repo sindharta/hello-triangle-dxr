@@ -35,76 +35,76 @@ struct AccelerationStructureBuffers {
 class D3D12HelloTriangle : public DXSample
 {
 public:
-	D3D12HelloTriangle(UINT width, UINT height, std::wstring name);
+    D3D12HelloTriangle(UINT width, UINT height, std::wstring name);
 
-	virtual void OnInit();
-	virtual void OnUpdate();
-	virtual void OnRender();
-	virtual void OnDestroy();
+    virtual void OnInit();
+    virtual void OnUpdate();
+    virtual void OnRender();
+    virtual void OnDestroy();
 
-	virtual void OnKeyUp(UINT8 /*key*/) override;
+    virtual void OnKeyUp(UINT8 /*key*/) override;
 
-	void CheckRaytracingSupport();
+    void CheckRaytracingSupport();
 
 private:
-	static const UINT FrameCount = 2;
+    static const UINT FrameCount = 2;
 
-	struct Vertex
-	{
-		XMFLOAT3 position;
-		XMFLOAT4 color;
-	};
+    struct Vertex
+    {
+        XMFLOAT3 position;
+        XMFLOAT4 color;
+    };
 
-	// Pipeline objects.
-	CD3DX12_VIEWPORT m_viewport;
-	CD3DX12_RECT m_scissorRect;
-	ComPtr<IDXGISwapChain3> m_swapChain;
-	ComPtr<ID3D12Device5> m_device;
-	ComPtr<ID3D12Resource> m_renderTargets[FrameCount];
-	ComPtr<ID3D12CommandAllocator> m_commandAllocator;
-	ComPtr<ID3D12CommandQueue> m_commandQueue;
-	ComPtr<ID3D12RootSignature> m_rootSignature;
-	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
-	ComPtr<ID3D12PipelineState> m_pipelineState;
-	ComPtr<ID3D12GraphicsCommandList4> m_commandList;
-	UINT m_rtvDescriptorSize;
+    // Pipeline objects.
+    CD3DX12_VIEWPORT m_viewport;
+    CD3DX12_RECT m_scissorRect;
+    ComPtr<IDXGISwapChain3> m_swapChain;
+    ComPtr<ID3D12Device5> m_device;
+    ComPtr<ID3D12Resource> m_renderTargets[FrameCount];
+    ComPtr<ID3D12CommandAllocator> m_commandAllocator;
+    ComPtr<ID3D12CommandQueue> m_commandQueue;
+    ComPtr<ID3D12RootSignature> m_rootSignature;
+    ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+    ComPtr<ID3D12PipelineState> m_pipelineState;
+    ComPtr<ID3D12GraphicsCommandList4> m_commandList;
+    UINT m_rtvDescriptorSize;
 
-	// App resources.
-	ComPtr<ID3D12Resource> m_vertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+    // App resources.
+    ComPtr<ID3D12Resource> m_vertexBuffer;
+    D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
 
-	// Synchronization objects.
-	UINT m_frameIndex;
-	HANDLE m_fenceEvent;
-	ComPtr<ID3D12Fence> m_fence;
-	UINT64 m_fenceValue;
+    // Synchronization objects.
+    UINT m_frameIndex;
+    HANDLE m_fenceEvent;
+    ComPtr<ID3D12Fence> m_fence;
+    UINT64 m_fenceValue;
 
-	bool m_raster;
+    bool m_raster;
 
-	ComPtr<ID3D12Resource> m_bottomLevelAS; // Storage for the bottom Level AS (only one for this tutorial)
+    ComPtr<ID3D12Resource> m_bottomLevelAS; // Storage for the bottom Level AS (only one for this tutorial)
 
-	nv_helpers_dx12::TopLevelASGenerator m_topLevelASGenerator;
-	AccelerationStructureBuffers m_topLevelASBuffers;
-	std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX >> m_instances;
+    nv_helpers_dx12::TopLevelASGenerator m_topLevelASGenerator;
+    AccelerationStructureBuffers m_topLevelASBuffers;
+    std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX >> m_instances;
 
-	void LoadPipeline();
-	void LoadAssets();
-	void PopulateCommandList();
-	void WaitForPreviousFrame();
+    void LoadPipeline();
+    void LoadAssets();
+    void PopulateCommandList();
+    void WaitForPreviousFrame();
 
-	/// Create the acceleration structure of an instance
-	///
-	/// \param     vVertexBuffers : pair of buffer and vertex count
-	/// \return    AccelerationStructureBuffers for TLAS
-	AccelerationStructureBuffers CreateBottomLevelAS(std::vector<std::pair<ComPtr<ID3D12Resource>, uint32_t >> vVertexBuffers);
+    /// Create the acceleration structure of an instance
+    ///
+    /// \param     vVertexBuffers : pair of buffer and vertex count
+    /// \return    AccelerationStructureBuffers for TLAS
+    AccelerationStructureBuffers CreateBottomLevelAS(std::vector<std::pair<ComPtr<ID3D12Resource>, uint32_t >> vVertexBuffers);
 
-	/// Create the main acceleration structure that holds
-	/// all instances of the scene
-	/// \param     instances : pair of BLAS and transform
-	void CreateTopLevelAS(const std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX >> &instances);
+    /// Create the main acceleration structure that holds
+    /// all instances of the scene
+    /// \param     instances : pair of BLAS and transform
+    void CreateTopLevelAS(const std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX >>& instances);
 
-	/// Create all acceleration structures, bottom and top
-	void CreateAccelerationStructures();
+    /// Create all acceleration structures, bottom and top
+    void CreateAccelerationStructures();
 
 };
 
