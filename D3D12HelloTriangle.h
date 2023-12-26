@@ -12,6 +12,7 @@
 #pragma once
 
 #include "DXSample.h"
+#include "nv_helpers_dx12/TopLevelASGenerator.h"
 
 using namespace DirectX;
 
@@ -75,4 +76,11 @@ private:
 	void LoadAssets();
 	void PopulateCommandList();
 	void WaitForPreviousFrame();
+};
+
+// #DXR
+struct AccelerationStructureBuffers {
+	ComPtr<ID3D12Resource> pScratch;      // Scratch memory for AS builder
+	ComPtr<ID3D12Resource> pResult;       // Where the AS is
+	ComPtr<ID3D12Resource> pInstanceDesc; // Hold the matrices of the instances
 };
