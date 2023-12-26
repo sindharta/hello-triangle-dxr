@@ -31,6 +31,9 @@ public:
 	virtual void OnUpdate();
 	virtual void OnRender();
 	virtual void OnDestroy();
+
+	virtual void OnKeyUp(UINT8 /*key*/) override;
+
 	void CheckRaytracingSupport();
 
 private:

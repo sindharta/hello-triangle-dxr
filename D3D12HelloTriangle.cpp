@@ -282,6 +282,16 @@ void D3D12HelloTriangle::OnDestroy()
 	CloseHandle(m_fenceEvent);
 }
 
+
+void D3D12HelloTriangle::OnKeyUp(UINT8 key) {
+	// Alternate between rasterization and raytracing using the spacebar
+	if (key == VK_SPACE) {
+		m_raster = !m_raster;
+	}
+
+}
+
+
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void D3D12HelloTriangle::CheckRaytracingSupport() {
