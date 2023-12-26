@@ -43,6 +43,11 @@ void D3D12HelloTriangle::OnInit()
     // to record yet. The main loop expects it to be closed, so close it now.
     ThrowIfFailed(m_commandList->Close());
 
+    // Create the raytracing pipeline, associating the shader code to symbol names
+    // and to their root signatures, and defining the amount of memory carried by
+    // rays (ray payload)
+    CreateRaytracingPipeline(); // #DXR
+
 }
 
 // Load the rendering pipeline dependencies.
