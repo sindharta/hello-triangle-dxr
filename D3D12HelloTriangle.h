@@ -74,6 +74,8 @@ private: //DXR
 
     void CreateRaytracingPipeline();
 
+    void CreateRaytracingOutputBuffer();
+    void CreateShaderResourceHeap();
 
 private:
     static const UINT FrameCount = 2;
@@ -129,6 +131,8 @@ private:
     // to use in the Shader Binding Table
     ComPtr<ID3D12StateObjectProperties> m_rtStateObjectProps;
 
+    ComPtr<ID3D12Resource> m_outputResource;
+    ComPtr<ID3D12DescriptorHeap> m_srvUavHeap;
 
 };
 
