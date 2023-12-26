@@ -338,18 +338,18 @@ void D3D12HelloTriangle::PopulateCommandList()
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
 	m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
-	// Record commands.
-	if (m_raster) {
-		const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-		m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-		m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-		m_commandList->DrawInstanced(3, 1, 0, 0);
-	} else {
-		//RTX
-		const float clearColor[] = { 0.6f, 0.8f, 0.4f, 1.0f };
-		m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	}
+    // Record commands.
+    if (m_raster) {
+        const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
+        m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+        m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+        m_commandList->DrawInstanced(3, 1, 0, 0);
+    } else {
+        //RTX
+        const float clearColor[] = { 0.6f, 0.8f, 0.4f, 1.0f };
+        m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+    }
 
 
 	// Indicate that the back buffer will now be used to present.
