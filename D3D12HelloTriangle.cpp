@@ -823,7 +823,7 @@ void D3D12HelloTriangle::CreateShaderBindingTable() {
     m_sbtHelper.AddMissProgram(L"Miss", {});
 
     // Adding the triangle hit shader
-    m_sbtHelper.AddHitGroup(L"HitGroup", {});
+    m_sbtHelper.AddHitGroup(L"HitGroup", { (void*)(m_vertexBuffer->GetGPUVirtualAddress()) });
 
     // Compute the size of the SBT given the number of shaders and their
     // parameters
