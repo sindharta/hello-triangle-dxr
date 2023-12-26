@@ -47,6 +47,35 @@ public:
     void CheckRaytracingSupport();
 
 private:
+    void LoadPipeline();
+    void LoadAssets();
+    void PopulateCommandList();
+    void WaitForPreviousFrame();
+
+private: //DXR
+
+    /// Create the acceleration structure of an instance
+    ///
+    /// \param     vVertexBuffers : pair of buffer and vertex count
+    /// \return    AccelerationStructureBuffers for TLAS
+    AccelerationStructureBuffers CreateBottomLevelAS(std::vector<std::pair<ComPtr<ID3D12Resource>, uint32_t >> vVertexBuffers);
+
+    /// Create the main acceleration structure that holds
+    /// all instances of the scene
+    /// \param     instances : pair of BLAS and transform
+    void CreateTopLevelAS(const std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX >>& instances);
+
+    /// Create all acceleration structures, bottom and top
+    void CreateAccelerationStructures();
+
+    ComPtr<ID3D12RootSignature> CreateRayGenSignature();
+    ComPtr<ID3D12RootSignature> CreateMissSignature();
+    ComPtr<ID3D12RootSignature> CreateHitSignature();
+
+    void CreateRaytracingPipeline();
+
+
+private:
     static const UINT FrameCount = 2;
 
     struct Vertex
@@ -82,29 +111,24 @@ private:
     bool m_raster;
 
     ComPtr<ID3D12Resource> m_bottomLevelAS; // Storage for the bottom Level AS (only one for this tutorial)
-
     nv_helpers_dx12::TopLevelASGenerator m_topLevelASGenerator;
     AccelerationStructureBuffers m_topLevelASBuffers;
     std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX >> m_instances;
 
-    void LoadPipeline();
-    void LoadAssets();
-    void PopulateCommandList();
-    void WaitForPreviousFrame();
+    ComPtr<IDxcBlob> m_rayGenLibrary;
+    ComPtr<IDxcBlob> m_hitLibrary;
+    ComPtr<IDxcBlob> m_missLibrary;
 
-    /// Create the acceleration structure of an instance
-    ///
-    /// \param     vVertexBuffers : pair of buffer and vertex count
-    /// \return    AccelerationStructureBuffers for TLAS
-    AccelerationStructureBuffers CreateBottomLevelAS(std::vector<std::pair<ComPtr<ID3D12Resource>, uint32_t >> vVertexBuffers);
+    ComPtr<ID3D12RootSignature> m_rayGenSignature;
+    ComPtr<ID3D12RootSignature> m_hitSignature;
+    ComPtr<ID3D12RootSignature> m_missSignature;
 
-    /// Create the main acceleration structure that holds
-    /// all instances of the scene
-    /// \param     instances : pair of BLAS and transform
-    void CreateTopLevelAS(const std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX >>& instances);
+    // Ray tracing pipeline state
+    ComPtr<ID3D12StateObject> m_rtStateObject;
+    // Ray tracing pipeline state properties, retaining the shader identifiers
+    // to use in the Shader Binding Table
+    ComPtr<ID3D12StateObjectProperties> m_rtStateObjectProps;
 
-    /// Create all acceleration structures, bottom and top
-    void CreateAccelerationStructures();
 
 };
 
