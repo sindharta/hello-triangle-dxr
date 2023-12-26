@@ -21,8 +21,11 @@ void RayGen() {
 
     // Define a ray, consisting of origin, direction, and the min-max distance values
     RayDesc ray;
-    ray.Origin = float3(d.x, -d.y, 1);
-    ray.Direction = float3(0, 0, -1);
+    //ray.Origin = float3(d.x, -d.y, 1);
+    //ray.Direction = float3(0, 0, -1);
+
+    ray.Origin= float3(0, 0, -1);
+    ray.Direction = float3(d.x, -d.y, 1);
     ray.TMin = 0;
     ray.TMax = 100000;
 
